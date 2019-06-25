@@ -3,6 +3,12 @@ import pandas as pd
 import numpy as np
 from alpha_vantage.timeseries import TimeSeries
 import os
+import warnings
+from dotenv import load_dotenv
+
+warnings.filterwarnings('ignore')
+
+load_dotenv()
 
 class Magic():
     '''
@@ -13,13 +19,7 @@ class Magic():
     #Initialize parameters
     def __init__(self, ticker):
 
-        # might need to initialize with a local variable that stores the actual key
-        # otherwise os.getenv() will look for the environment variable
-        # and if the name of the environment variable is not the same
-        # then this will not work!!!
-        # ALPHAVANTAGE_API_KEY = 'SXG08DL4S2EW8SKC'
-
-        ALPHAVANTAGE_API_KEY = os.getenv('ALPHAVANTAGE_API_KEY')
+        ALPHAVANTAGE_API_KEY = os.environ['ALPHAVANTAGE_API_KEY']
 
         ts = TimeSeries(key=ALPHAVANTAGE_API_KEY, output_format='pandas')
 
@@ -74,9 +74,9 @@ class Magic():
         self.yearly_seasonality = True
         self.changepoints = None
 
-        print('{} Preprocessing Initialized. Data covers {} to {}.'.format(self.symbol,
-                                                                           self.min_date,
-                                                                           self.max_date))
+        # print('{} Preprocessing Initialized. Data covers {} to {}.'.format(self.symbol,
+        #                                                                    self.min_date,
+        #                                                                    self.max_date))
     """
     Make sure start and end dates are in the range and can be
     converted to pandas datetimes. Returns dates in the correct format
@@ -133,10 +133,10 @@ class Magic():
             Added by Chris Louie for stockly
         '''
         # Default is to use the object stock data
-        if start_date is None:
-            start_date = self.min_date
-        if end_date is None:
-            end_date = self.max_date
+        # if start_date is None:
+        #     start_date = self.min_date
+        # if end_date is None:
+        #     end_date = self.max_date
         if not df:
             df = self.stock.copy()
 
@@ -213,8 +213,8 @@ class Magic():
             else:
                 down_days.append(0)
                 up_days.append(0)
-        print(len(up_days))
-        print(len(down_days))
+        # print(len(up_days))
+        # print(len(down_days))
         trim_df['Up Days'] = up_days
         trim_df['Down Days'] = down_days
 
@@ -278,10 +278,10 @@ class Magic():
         future = model.make_future_dataframe(periods = days, freq='D')
         future = model.predict(future)
 
-        if days > 0:
-            # Print the predicted price
-            print('Predicted Price on {} = ${:.2f}'.format(
-                future.loc[future.index[-1], 'ds'], future.loc[future.index[-1], 'yhat']))
+        # if days > 0:
+        #     # Print the predicted price
+        #     print('Predicted Price on {} = ${:.2f}'.format(
+        #         future.loc[future.index[-1], 'ds'], future.loc[future.index[-1], 'yhat']))
 
         return model, future
 
@@ -452,8 +452,8 @@ class Magic():
             else:
                 down_days.append(0)
                 up_days.append(0)
-        print(len(up_days))
-        print(len(down_days))
+        # print(len(up_days))
+        # print(len(down_days))
         preds['Up Days'] = up_days
         preds['Down Days'] = down_days
 
@@ -495,11 +495,12 @@ class Magic():
         future_decrease = future[future['direction'] == 0]
 
         # Print out the dates
-        print('\nPredicted Increase: \n')
-        print(future_increase[['Date', 'estimate', 'change', 'upper', 'lower']])
+        # # uncomment for local debugging
+        # print('\nPredicted Increase: \n')
+        # print(future_increase[['Date', 'estimate', 'change', 'upper', 'lower']])
 
-        print('\nPredicted Decrease: \n')
-        print(future_decrease[['Date', 'estimate', 'change', 'upper', 'lower']])
+        # print('\nPredicted Decrease: \n')
+        # print(future_decrease[['Date', 'estimate', 'change', 'upper', 'lower']])
 
         return future
 
@@ -566,4 +567,3 @@ class Magic():
         future_analysis = dict(zip(keys,values))
 
         return future_analysis
-

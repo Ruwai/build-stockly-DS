@@ -1,1 +1,1 @@
-web: gunicorn app:APP -t 120
+web: gunicorn stockly:APP -t 300

@@ -2,11 +2,7 @@
 
 # TODOs:
 
-- Clean up repo
-- update repo with app.py
-- install dependencies to pipenv
-- commit changes to heroku
-- deleted Pipfile, install dependencies via `requirements.txt`
+- project over
 
 `pip install requirements.txt`
 
