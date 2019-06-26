@@ -17,3 +17,5 @@ SQLAlchemy==1.3.5
 func-timeout==4.3.3
 python-dotenv
 psycopg2
+rq
+redis

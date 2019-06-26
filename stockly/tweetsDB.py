@@ -36,7 +36,6 @@ postgres_params = dict(
 )
 
 def handler(symbol):
-
     url = URL(**postgres_params)
     print('>>> engine url created')
     engine = create_engine(url)

@@ -3,6 +3,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from dotenv import load_dotenv
 from .tweetsDB import handler, postgres_params
 from .tables import Tweets
+from .db_utils import ticker_exists_in_DB
 from sqlalchemy import create_engine, select, or_, Column, Integer, String
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import sessionmaker
@@ -72,6 +73,7 @@ class TS(object):
         engine = create_engine(DB_uri)
         Session = sessionmaker(bind=engine)
         session = Session()
+        ticker_exists_in_DB(symbol)
         select_statement = session.query(Tweets).filter_by(ticker=symbol).statement
         data = pd.read_sql(select_statement, session.bind)
 
@@ -109,9 +111,10 @@ class TS(object):
 
         sell = sum(neg)
         buy = sum(pos)
+        neu = sum(neu)
         comp = sum(compound)
 
-        scores = [sell, comp, buy]
+        scores = [sell, neu, buy]
         values = softmax(scores)
         keys = ['Sell', 'Hold', 'Buy']
 

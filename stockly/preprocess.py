@@ -460,7 +460,7 @@ class Magic():
         return preds
 
     # Predict the future price for a given range of days
-    def predict_future(self, days=30):
+    def predict_future(self, days=7):
 
         # Use past self.training_years years for training
         train = self.stock[self.stock['Date'] > (max(self.stock['Date']) - pd.DateOffset(years=self.training_years))]
@@ -491,8 +491,8 @@ class Magic():
         future = future.rename(columns={'ds': 'Date', 'yhat': 'estimate', 'diff': 'change',
                                         'yhat_upper': 'upper', 'yhat_lower': 'lower'})
 
-        future_increase = future[future['direction'] == 1]
-        future_decrease = future[future['direction'] == 0]
+        # future_increase = future[future['direction'] == 1]
+        # future_decrease = future[future['direction'] == 0]
 
         # Print out the dates
         # # uncomment for local debugging
@@ -519,6 +519,7 @@ class Magic():
         output = self.make_a_df()
         average_delta = np.mean(output['Daily Change'])
 
+        # take the
         buy = sum(output['Up Days'] == 1)
         sell = sum(output['Down Days'] == 1)
 

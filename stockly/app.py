@@ -25,16 +25,22 @@ def create_app():
     APP.config['PG_DBNAME'] = os.environ['PG_DBNAME']
 
     @APP.route('/')
-    @APP.route('/api', methods=['GET','POST'])
+    @APP.route('/api', methods=['GET', 'POST'])
     def functionality():
+        # load pretrained model from pickle file
         model_path = Path(__file__).parent.resolve()
         model = pickle.load(open(os.path.join(model_path, "new_model.p"), "rb"))
 
-        inp = 'FB'
+        # default to Facebook
         if request.method == 'POST':
             inp = request.values['ticker']
-        market_df = generate_df(inp)
+        elif request.method == 'GET':
+            inp = request.values['ticker']
+        else:
+            inp = 'FB'
 
+        # derek's technical analysis part
+        market_df = generate_df(inp)
         market_df = market_df.dropna()
         X = market_df[['5. volume', 'MACD', 'AROONOSC','MACD_Hist', 'MACD_Signal', 'DX', 'SlowD', 'SlowK']]
         sc = StandardScaler()
@@ -48,11 +54,11 @@ def create_app():
         historical = magik.output_historical()
         future = magik.output_future()
 
-        json_obj = {'TA': {'sell':y_prebro[0][0], 'hold':y_prebro[0][1], 'buy':y_prebro[0][2]},
-                    'Sentiment': {'sell':sentiment['Sell'], 'hold':sentiment['Hold'], 'buy':sentiment['Buy']},
-                    'Historical': {'sell':historical['Sell'], 'hold':historical['Hold'], 'buy':historical['Buy']},
-                    'Future': {'sell':future['Sell'], 'hold':future['Hold'], 'buy':future['Buy']}
-                    }
+        json_obj = {'TA': {'sell': y_prebro[0][0], 'hold': y_prebro[0][1], 'buy': y_prebro[0][2]},
+                    'Sentiment': {'sell': sentiment['Sell'], 'hold': sentiment['Hold'], 'buy': sentiment['Buy']},
+                    'Historical': {'sell': historical['Sell'], 'hold': historical['Hold'], 'buy': historical['Buy']},
+                    'Future': {'sell': future['Sell'], 'hold': future['Hold'], 'buy': future['Buy']}
+        }
 
         response = json.dumps(json_obj)
         return response
