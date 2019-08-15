@@ -1,15 +1,20 @@
 from flask import Flask, request
-import json
-import pickle
-import os
-from sklearn.preprocessing import StandardScaler
-from pathlib import Path
+from dotenv import load_dotenv
+from .derekscode import predict_technical
 from .preprocess import Magic
 from .sentiment import TS
-from .derekscode import generate_df
-from dotenv import load_dotenv
+import json
+import os
+from redis import Redis
+from rq import Queue, Connection
+from rq.worker import HerokuWorker as Worker
 
 load_dotenv()
+
+# EXAMPLE LAYOUT FOR RQ
+# queue = rq.Queue('task-name', connection=conn)
+# job = queue.enqueue('app.{module_name}.{function_name}', **args('{any_arguments_to_function}'))
+# job.get_id()
 
 def create_app():
     APP = Flask(__name__)
@@ -23,14 +28,11 @@ def create_app():
     APP.config['PG_USERNAME'] = os.environ['PG_USERNAME']
     APP.config['PG_PASSWORD'] = os.environ['PG_PASSWORD']
     APP.config['PG_DBNAME'] = os.environ['PG_DBNAME']
+    APP.config['REDISTOGO_URL'] = os.environ['REDISTOGO_URL']
 
     @APP.route('/')
     @APP.route('/api', methods=['GET', 'POST'])
     def functionality():
-        # load pretrained model from pickle file
-        model_path = Path(__file__).parent.resolve()
-        model = pickle.load(open(os.path.join(model_path, "new_model.p"), "rb"))
-
         # default to Facebook
         if request.method == 'POST':
             inp = request.values['ticker']
@@ -40,16 +42,13 @@ def create_app():
             inp = 'FB'
 
         # derek's technical analysis part
-        market_df = generate_df(inp)
-        market_df = market_df.dropna()
-        X = market_df[['5. volume', 'MACD', 'AROONOSC','MACD_Hist', 'MACD_Signal', 'DX', 'SlowD', 'SlowK']]
-        sc = StandardScaler()
-        X = sc.fit_transform(X)
-        y_prebro = model.predict_proba(X[0].reshape(1, -1))
+        y_prebro = predict_technical(inp)
 
+        # twitter sentiment analysis
         twitter = TS(inp)
         sentiment = twitter.output_twitter()
 
+        # facebook prophet + historical analysis
         magik = Magic(inp)
         historical = magik.output_historical()
         future = magik.output_future()
@@ -59,8 +58,8 @@ def create_app():
                     'Historical': {'sell': historical['Sell'], 'hold': historical['Hold'], 'buy': historical['Buy']},
                     'Future': {'sell': future['Sell'], 'hold': future['Hold'], 'buy': future['Buy']}
         }
-
         response = json.dumps(json_obj)
+        
         return response
 
     return APP

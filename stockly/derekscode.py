@@ -1,6 +1,9 @@
 import pandas as pd
 from alpha_vantage.timeseries import TimeSeries
+from sklearn.preprocessing import StandardScaler
+from pathlib import Path
 import requests
+import pickle
 import os
 
 ALPHAVANTAGE_API_KEY = os.environ['ALPHAVANTAGE_API_KEY']
@@ -33,3 +36,17 @@ def generate_df(ticker):
     df = df.join(df_dx)
 
     return df
+
+def predict_technical(ticker):
+
+    model_path = Path(__file__).parent.resolve()
+    model = pickle.load(open(os.path.join(model_path, "new_model.p"), "rb"))
+
+    market_df = generate_df(ticker)
+    market_df = market_df.dropna()
+    X = market_df[['5. volume', 'MACD', 'AROONOSC','MACD_Hist', 'MACD_Signal', 'DX', 'SlowD', 'SlowK']]
+    sc = StandardScaler()
+    X = sc.fit_transform(X)
+    y_prebro = model.predict_proba(X[0].reshape(1, -1))
+
+    return y_prebro

@@ -4,6 +4,8 @@ import numpy as np
 from alpha_vantage.timeseries import TimeSeries
 import os
 import warnings
+from multiprocessing.pool import Pool 
+import multiprocessing as mp
 from dotenv import load_dotenv
 
 warnings.filterwarnings('ignore')

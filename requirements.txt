@@ -18,4 +18,6 @@ func-timeout==4.3.3
 python-dotenv
 psycopg2
 rq
-redis
+redis>=2.0.0
+Flask-RQ2
+rq-dashboard
