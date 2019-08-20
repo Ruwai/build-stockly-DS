@@ -1,12 +1,34 @@
-# build-stockly-DS
+# stockly (DS Backend)
 
-# TODOs:
+### Prerequisites 
 
-- project over
+```
+cd /some/directory/on/your/computer
+git clone (giturlhere)
+cd (path/to/stockly)
+pip install requirements.txt
+```
 
-`pip install requirements.txt`
+### Known Issues 
 
-## Historical/Future Usage
+##### Please feel free to open pull requests if you have **any** ideas or solutions to the issues I will present below:
+
+1. Issue with concurrency and assigning tasks / jobs to workers in a Redis queue. 
+
+2. Problem with migrating databases with Postgres RDS (Not sure if this is an actual problem since tweets are only added if the ticker does not exist in the database)
+
+
+### TODO:
+
+1. Redis Queue for jobs
+
+2. Faster JSON responses
+
+3. Create Dockerfile for development purposes (probably not)
+
+4. Write more documentation
+
+### Historical/Future Usage
 
 ```python
 from preprocess import Magic
@@ -28,7 +50,7 @@ print(historical)
 future = tesla.output_future()
 print(future)
 ```
-## TwitterSentiment Usage
+### TwitterSentiment Usage
 
 ```python
 from sentiment import TwitterSentiment
